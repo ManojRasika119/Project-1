@@ -1,4 +1,4 @@
-from werlzeug.security import safe_str_cmp
+from werkzeug.security import safe_str_cmp
 from user import User
 
 users = [
@@ -10,7 +10,7 @@ userid_mapping = {u.id: u for u in users}
 
 def authenticate(username, password):
     user = username_mapping.get(username, None)
-    if user and safe_str_cmp(user.password ,password):
+    if user and safe_str_cmp(user.password.encode('utf-8') ,password.encode('utf-8')):
         return user
 
 def identity(payload):
