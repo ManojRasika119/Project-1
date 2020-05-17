@@ -1,60 +1,19 @@
-from flask import Flask, request
-from flask_restful import Resource, Api, reqparse
+from flask import Flask # to import relavant packages from relavant library
+from flask_restful import Api
 from flask_jwt import JWT, jwt_required, current_identity
 
 from security import authenticate, identity
+from user import UserRegister # UserRegister is our Resource
+from item import Item # to import Item file whice is newly created
 
 app = Flask(__name__)
 app.secret_key = 'ManojR'
 api = Api(app)
 
-items = []
+jwt = JWT(app, authenticate, identity) #applying JWT authentication
 
-class Item(Resource):
-    def get(self, name):
-            for item in items:
-                if item['name'] == name:
-                    return item
-            return {'item': None}, 404
+api.add_resource(Item, '/item/<string:name>')
 
-    def post(self, name):
-        data = request.get_json()
-        item = {'name': name, 'price': data['price']}
-        items.append(item)
-        return item, 201
-
-    def put(self, name):
-        praser = reqparse.RequestParser()
-        praser.add_argument('price',
-            type = float,
-            required = True,
-            help = "This field cannot be left blank!"
-        )
-        data = parser.parse_arg()
-        print(data['another']);
-        item = next(filter(lambda x: x['name'] == name, items), None)
-        if item is None:
-            item = {'name': name, 'price': data['price']}
-            items.append(item)
-        else:
-            item.update(data)
-        return item
-
-
-class ItemList(Resource):
-    def get(self):
-        return {"items": items}
-
-jwt = JWT(app, authenticate, identity)
-
-@app.route('/auth')
-@jwt_required()
-def auth():
-    return '%s' % current_identity
-
-if __name__ == '__main__':
-
-    api.add_resource(Item, '/item/<string:name>')
-api.add_resource(ItemList, '/items')
+api.add_resource(UserRegister, '/register')#once POST method executed, UserRegister will be called and then it calls post method in user.py
 
 app.run(port=5000, debug=True)
